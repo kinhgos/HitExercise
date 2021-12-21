@@ -57,23 +57,32 @@
 
 $("#suppliers").on("click",".js-delete-sup", function (e) {
     var link = $(e.target);
-    bootbox.confirm({
+    bootbox.dialog({
+        title: "Confirm",
         message: 'Are you sure you want to delete this supplier?',
-        size: 'small',
-        callback: function (result) {
-            if (result === false) {
-                bootbox.hideAll();
+        size: 'large',
+        buttons: {
+            no: {
+                label: "No",
+                className: 'btn-default',
+                callback: function () {
+                    bootbox.hideAll();
+                }
+            },
+            yes: {
+                label: "Yes",
+                className: 'btn-danger',
+                callback: function () {
+                    $.ajax({
+                        url: '/api/suppliers/' + link.attr("data-sup-id"),
+                        method: 'Delete'
+                    }).done(function () {
+                        dataTable.ajax.reload();
+                    }).fail(function (error) {
+                        alert("Something went wrong");
+                    });
+                }
             }
-            else {
-                $.ajax({
-                    url: '/api/suppliers/' + link.attr("data-sup-id"),
-                    method: 'Delete'
-                }).done(function () {
-                    dataTable.ajax.reload();
-                }).fail(function (error) {
-                    alert("Something went wrong");
-                });
-            };
         }
     })
 })
