@@ -3,6 +3,7 @@ using FluentEmail.Smtp;
 using HitExercise.MVC.Models.Dtos;
 using Newtonsoft.Json;
 using System;
+using System.Configuration;
 using System.IO;
 
 using System.Net;
@@ -17,41 +18,35 @@ namespace HitExercise.MVC.HelperClasses
     [Serializable]
     public class SendEmail
     {
-        public string url { get; set; }
+        private string url { get; set; }
 
-        public int port { get; set; }
-        public bool ssl { get; set; }
+        private int port { get; set; }
+        private bool ssl { get; set; }
 
-        public string userName { get;  set; }
+        private string userName { get;  set; }
 
-        public string password { get;  set; }
+        private string password { get;  set; }
 
-        public SendEmail GetSettings()
-        {           
+        public SendEmail()
+        {
+            url = ConfigurationManager.AppSettings["url"];
+            port = int.Parse(ConfigurationManager.AppSettings["port"]);
+            ssl = bool.Parse(ConfigurationManager.AppSettings["ssl"]);
+            userName = ConfigurationManager.AppSettings["userName"];
+            password = ConfigurationManager.AppSettings["password"];
 
-            var filename = @"D:\PeopleCert Education\DEV\HitExercise\HitExercise.MVC\HelperClasses\EmailSettings.json";
-
-            if (File.Exists(filename))
-            {
-                SendEmail sendEmail = JsonConvert.DeserializeObject<SendEmail>(File.ReadAllText(filename));
-
-
-                return sendEmail;
-            }
-            throw new ArgumentNullException("File does not exist");
-            
         }
 
         public async Task SendEmailToSupplier(SupplierDto supplierDto)
         {
-            var emailSettings = GetSettings();
-            var sender = new SmtpSender(() => new SmtpClient(emailSettings.url)
+            
+            var sender = new SmtpSender(() => new SmtpClient(url)
             {
                 UseDefaultCredentials = false,
-                EnableSsl = emailSettings.ssl,
+                EnableSsl = ssl,
                 DeliveryMethod = SmtpDeliveryMethod.Network,
-                Port = emailSettings.port,
-                Credentials = new NetworkCredential(emailSettings.userName, emailSettings.password)
+                Port = port,
+                Credentials = new NetworkCredential(userName, password)
             });
 
 
@@ -70,7 +65,7 @@ namespace HitExercise.MVC.HelperClasses
             
 
             var email = await Email
-                .From(emailSettings.userName)
+                .From(userName)
                 .To(supplierDto.Email, supplierDto.Name)
                 .Subject("Welcome to Hit Exercise")
                 .Body(template.ToString())
