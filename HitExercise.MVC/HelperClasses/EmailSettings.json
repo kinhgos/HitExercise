@@ -1,0 +1,8 @@
+{
+    "url": "smtp.test.com",
+    "port": 500,
+    "ssl": true,
+    "userName": "test@test.gr",
+    "password": "Test1234"
+  
+}
